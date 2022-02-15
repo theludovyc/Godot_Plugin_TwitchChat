@@ -1,0 +1,93 @@
+[gd_scene load_steps=6 format=2]
+
+[ext_resource path="res://addons/TwitchChat/ChatDock/Gift.gd" type="Script" id=1]
+[ext_resource path="res://addons/TwitchChat/ChatDock/ChatContainer.gd" type="Script" id=2]
+[ext_resource path="res://addons/TwitchChat/ChatDock/Button.gd" type="Script" id=3]
+[ext_resource path="res://addons/TwitchChat/ChatDock/ChatDock.gd" type="Script" id=4]
+[ext_resource path="res://addons/TwitchChat/icon.png" type="Texture" id=5]
+
+[node name="TwitchChat" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 4 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Gift" type="Node" parent="."]
+script = ExtResource( 1 )
+__meta__ = {
+"_editor_icon": ExtResource( 5 )
+}
+get_images = true
+
+[node name="ChatContainer" type="VBoxContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Chat" type="Panel" parent="ChatContainer"]
+show_behind_parent = true
+margin_right = 1024.0
+margin_bottom = 572.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ScrollContainer" type="ScrollContainer" parent="ChatContainer/Chat"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_left = 10.0
+margin_top = 10.0
+margin_right = -10.0
+margin_bottom = -10.0
+follow_focus = true
+scroll_horizontal_enabled = false
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="ChatMessagesContainer" type="VBoxContainer" parent="ChatContainer/Chat/ScrollContainer"]
+margin_right = 1004.0
+margin_bottom = 552.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+custom_constants/separation = 6
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="HBoxContainer" type="HBoxContainer" parent="ChatContainer"]
+margin_top = 576.0
+margin_right = 1024.0
+margin_bottom = 600.0
+
+[node name="LineEdit" type="LineEdit" parent="ChatContainer/HBoxContainer"]
+margin_right = 920.0
+margin_bottom = 24.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+caret_blink = true
+caret_blink_speed = 0.5
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="Button" type="Button" parent="ChatContainer/HBoxContainer"]
+margin_left = 924.0
+margin_right = 1024.0
+margin_bottom = 24.0
+rect_min_size = Vector2( 100, 0 )
+text = "Send"
+script = ExtResource( 3 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[connection signal="join_message" from="Gift" to="." method="_on_Gift_join_message"]
+[connection signal="part_message" from="Gift" to="." method="_on_Gift_part_message"]
