@@ -26,7 +26,7 @@ func put_chat(senderdata : SenderData, msg : String):
 			var emote_string = "[img=center]" + $"../Gift".image_cache.get_emote(loc.id).resource_path +"[/img]"
 			msg = msg.substr(0, loc.start + offset) + emote_string + msg.substr(loc.end + offset + 1)
 			offset += emote_string.length() + loc.start - loc.end - 1
-	var bottom : bool = $Chat/ScrollContainer.scroll_vertical == $Chat/ScrollContainer.get_v_scrollbar().max_value - $Chat/ScrollContainer.get_v_scrollbar().rect_size.y
+	var bottom : bool = $Chat/ScrollContainer.scroll_vertical == $Chat/ScrollContainer.get_v_scrollbar().max_value
 	$Chat/ScrollContainer/ChatMessagesContainer.add_child(msgnode)
 	msgnode.set_msg(get_time(), senderdata, msg, badges)
 	yield(get_tree(), "idle_frame")
@@ -35,7 +35,7 @@ func put_chat(senderdata : SenderData, msg : String):
 
 func put_join(user_name:String):
 	var msgnode : Control = MsgNode.instance()
-	var bottom : bool = $Chat/ScrollContainer.scroll_vertical == $Chat/ScrollContainer.get_v_scrollbar().max_value - $Chat/ScrollContainer.get_v_scrollbar().rect_size.y
+	var bottom : bool = $Chat/ScrollContainer.scroll_vertical == $Chat/ScrollContainer.get_v_scrollbar().max_value
 	$Chat/ScrollContainer/ChatMessagesContainer.add_child(msgnode)
 	msgnode.set_join(get_time(), user_name)
 	yield(get_tree(), "idle_frame")
