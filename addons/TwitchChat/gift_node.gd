@@ -115,7 +115,7 @@ func send(text : String, token : bool = false) -> void:
 	websocket.get_peer(1).put_packet(text.to_utf8())
 	if(OS.is_debug_build()):
 		if(!token):
-			print("< " + text.strip_edges(false))
+			handle_send(text.strip_edges(false))
 		else:
 			print("< PASS oauth:******************************")
 
@@ -181,7 +181,6 @@ func handle_message(message : String, tags : Dictionary) -> void:
 		return
 		
 	if(message == "PING :tmi.twitch.tv"):
-		print("> " + message)
 		send("PONG :tmi.twitch.tv")
 		emit_signal("pong")
 		return
@@ -197,19 +196,25 @@ func handle_message(message : String, tags : Dictionary) -> void:
 			handle_command(sender_data, msg[3].split(" ", true, 1))
 			emit_signal("chat_message", sender_data, msg[3].right(1))
 		"WHISPER":
+			print("> " + message)
 			var sender_data : SenderData = SenderData.new(user_regex.search(msg[0]).get_string(), msg[2], tags)
 			handle_command(sender_data, msg[3].split(" ", true, 1), true)
 			emit_signal("whisper_message", sender_data, msg[3].right(1))
 		"RECONNECT":
 			twitch_restarting = true
 		"JOIN":
-			print("> " + message)
 			emit_signal("join_message", msg[0].left(msg[0].find('!')).right(1))
 		"PART":
 			emit_signal("part_message")
 		_:
 			print("> " + message)
 			emit_signal("unhandled_message", message, tags)
+
+func handle_send(message : String):
+	if message == "PONG :tmi.twitch.tv":
+		return
+	else:
+		print("< " + message)
 
 func handle_command(sender_data : SenderData, msg : PoolStringArray, whisper : bool = false) -> void:
 	if(command_prefixes.has(msg[0].substr(1, 1))):
