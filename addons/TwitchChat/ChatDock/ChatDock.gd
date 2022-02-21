@@ -5,11 +5,13 @@ var base_name:String
 
 var viewers := 0
 
+onready var chat = $ChatContainer
+
 func _ready():
 	base_name = name
 
 func chat_message(data : SenderData, msg : String) -> void:
-	$ChatContainer.put_chat(data, msg)
+	chat.put_chat(data, msg)
 
 # Check the CommandInfo class for the available info of the cmd_info.
 func command_test(cmd_info : CommandInfo) -> void:
@@ -33,13 +35,12 @@ func greet_me(cmd_info : CommandInfo) -> void:
 func list(cmd_info : CommandInfo, arg_ary : PoolStringArray) -> void:
 	$Gift.chat(arg_ary.join(", "))
 
-func _on_Gift_join_message():
+func _on_Gift_join_message(user_name:String):
 	viewers += 1
 	
 	name = base_name + "(" + str(viewers) + ")"
 	
-	pass # Replace with function body.
-
+	chat.put_join(user_name)
 
 func _on_Gift_part_message():
 	viewers -= 1

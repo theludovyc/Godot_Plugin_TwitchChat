@@ -18,7 +18,7 @@ signal whisper_message(sender_data, message)
 # Unhandled data passed through
 signal unhandled_message(message, tags)
 
-signal join_message()
+signal join_message(user_name)
 signal part_message()
 # A command has been called with invalid arg count
 signal cmd_invalid_argcount(cmd_name, sender_data, cmd_data, arg_ary)
@@ -142,8 +142,6 @@ func data_received() -> void:
 			for tag in msg[0].split(";"):
 				var pair = tag.split("=")
 				tags[pair[0]] = pair[1]
-		if(OS.is_debug_build()):
-			print("> " + message)
 		handle_message(message, tags)
 
 # Registers a command on an object with a func to call, similar to connect(signal, instance, func).
@@ -181,10 +179,13 @@ func handle_message(message : String, tags : Dictionary) -> void:
 		print_debug("Authentication failed.")
 		emit_signal("login_attempt", false)
 		return
+		
 	if(message == "PING :tmi.twitch.tv"):
+		print("> " + message)
 		send("PONG :tmi.twitch.tv")
 		emit_signal("pong")
 		return
+		
 	var msg : PoolStringArray = message.split(" ", true, 3)
 	
 	match msg[1]:
@@ -202,10 +203,12 @@ func handle_message(message : String, tags : Dictionary) -> void:
 		"RECONNECT":
 			twitch_restarting = true
 		"JOIN":
-			emit_signal("join_message")
+			print("> " + message)
+			emit_signal("join_message", msg[0].left(msg[0].find('!')).right(1))
 		"PART":
 			emit_signal("part_message")
 		_:
+			print("> " + message)
 			emit_signal("unhandled_message", message, tags)
 
 func handle_command(sender_data : SenderData, msg : PoolStringArray, whisper : bool = false) -> void:

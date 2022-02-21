@@ -1,9 +1,15 @@
 tool
 extends VBoxContainer
 
-func put_chat(senderdata : SenderData, msg : String):
-	var msgnode : Control = preload("res://addons/TwitchChat/ChatDock/ChatMessage.tscn").instance()
+onready var MsgNode = preload("res://addons/TwitchChat/ChatDock/ChatMessage.tscn")
+
+func get_time() -> String:
 	var time = OS.get_time()
+	
+	return str(time["hour"]) + ":" + ("0" + str(time["minute"]) if time["minute"] < 10 else str(time["minute"]))
+
+func put_chat(senderdata : SenderData, msg : String):
+	var msgnode : Control = MsgNode.instance()
 	var badges : String = ""
 	if ($"../Gift".image_cache):
 		for badge in senderdata.tags["badges"].split(",", false):
@@ -21,12 +27,21 @@ func put_chat(senderdata : SenderData, msg : String):
 			msg = msg.substr(0, loc.start + offset) + emote_string + msg.substr(loc.end + offset + 1)
 			offset += emote_string.length() + loc.start - loc.end - 1
 	var bottom : bool = $Chat/ScrollContainer.scroll_vertical == $Chat/ScrollContainer.get_v_scrollbar().max_value - $Chat/ScrollContainer.get_v_scrollbar().rect_size.y
-	msgnode.set_msg(str(time["hour"]) + ":" + ("0" + str(time["minute"]) if time["minute"] < 10 else str(time["minute"])), senderdata, msg, badges)
 	$Chat/ScrollContainer/ChatMessagesContainer.add_child(msgnode)
+	msgnode.set_msg(get_time(), senderdata, msg, badges)
 	yield(get_tree(), "idle_frame")
 	if (bottom):
 		$Chat/ScrollContainer.scroll_vertical = $Chat/ScrollContainer.get_v_scrollbar().max_value
 
+func put_join(user_name:String):
+	var msgnode : Control = MsgNode.instance()
+	var bottom : bool = $Chat/ScrollContainer.scroll_vertical == $Chat/ScrollContainer.get_v_scrollbar().max_value - $Chat/ScrollContainer.get_v_scrollbar().rect_size.y
+	$Chat/ScrollContainer/ChatMessagesContainer.add_child(msgnode)
+	msgnode.set_join(get_time(), user_name)
+	yield(get_tree(), "idle_frame")
+	if (bottom):
+		$Chat/ScrollContainer.scroll_vertical = $Chat/ScrollContainer.get_v_scrollbar().max_value
+	
 class EmoteLocation extends Reference:
 	var id : String
 	var start : int
