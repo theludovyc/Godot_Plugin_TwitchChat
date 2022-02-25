@@ -7,4 +7,4 @@ func set_msg(stamp : String, data : SenderData, msg : String, badges : String) -
 	rtl.bbcode_text = stamp + " " + badges + "[b][color="+ data.tags["color"] + "]" + data.tags["display-name"] +"[/color][/b]: " + msg
 
 func set_join(time:String, user_name:String):
-	rtl.bbcode_text = time + " join " + user_name 
+	rtl.bbcode_text = time + " join " + user_name

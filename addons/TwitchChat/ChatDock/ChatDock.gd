@@ -8,7 +8,7 @@ var viewers := 0
 onready var chat = $ChatContainer
 
 func _ready():
-	base_name = name
+	base_name = "TwitchChat"
 
 func chat_message(data : SenderData, msg : String) -> void:
 	chat.put_chat(data, msg)

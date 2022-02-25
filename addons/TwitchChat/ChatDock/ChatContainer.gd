@@ -1,7 +1,21 @@
 tool
 extends VBoxContainer
 
-onready var MsgNode = preload("res://addons/TwitchChat/ChatDock/ChatMessage.tscn")
+onready var scroll_container = $Chat/ScrollContainer
+
+var MsgNode = preload("res://addons/TwitchChat/ChatDock/ChatMessage.tscn")
+
+var to_bottom := false
+
+var i := 0
+
+func _ready():
+	var scrollbar = scroll_container.get_v_scrollbar()
+	
+	scrollbar.connect("changed", self, "scroll_reset")
+
+func on_value_changed(value):
+	prints("ChatContainer", "on_value_changed", value)
 
 func get_time() -> String:
 	var time = OS.get_time()
@@ -26,21 +40,27 @@ func put_chat(senderdata : SenderData, msg : String):
 			var emote_string = "[img=center]" + $"../Gift".image_cache.get_emote(loc.id).resource_path +"[/img]"
 			msg = msg.substr(0, loc.start + offset) + emote_string + msg.substr(loc.end + offset + 1)
 			offset += emote_string.length() + loc.start - loc.end - 1
-	var bottom : bool = $Chat/ScrollContainer.scroll_vertical == $Chat/ScrollContainer.get_v_scrollbar().max_value
+	var bottom : bool = scroll_container.scroll_vertical == scroll_container.get_v_scrollbar().max_value
 	$Chat/ScrollContainer/ChatMessagesContainer.add_child(msgnode)
 	msgnode.set_msg(get_time(), senderdata, msg, badges)
 	yield(get_tree(), "idle_frame")
 	if (bottom):
-		$Chat/ScrollContainer.scroll_vertical = $Chat/ScrollContainer.get_v_scrollbar().max_value
+		scroll_container.scroll_vertical = scroll_container.get_v_scrollbar().max_value
+
+func scroll_reset():
+	if to_bottom:
+		scroll_container.scroll_vertical = scroll_container.get_v_scrollbar().max_value
+		to_bottom = false
 
 func put_join(user_name:String):
 	var msgnode : Control = MsgNode.instance()
-	var bottom : bool = $Chat/ScrollContainer.scroll_vertical == $Chat/ScrollContainer.get_v_scrollbar().max_value
+	
+	var scrollbar = scroll_container.get_v_scrollbar()
+	
+	to_bottom = scrollbar.value + scrollbar.page >= scrollbar.max_value
+	
 	$Chat/ScrollContainer/ChatMessagesContainer.add_child(msgnode)
 	msgnode.set_join(get_time(), user_name)
-	yield(get_tree(), "idle_frame")
-	if (bottom):
-		$Chat/ScrollContainer.scroll_vertical = $Chat/ScrollContainer.get_v_scrollbar().max_value
 	
 class EmoteLocation extends Reference:
 	var id : String
