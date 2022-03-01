@@ -1,6 +1,15 @@
 # Godot_Plugin_TwitchChat
 Based on https://github.com/MennoMax/gift add a docked chat in Godot Editor
 
+**Install**
+Add a "auth.txt" file in your "res://" folder.
+In it :
+Name
+TwitchToken
+Channel
+
+To obtain twitch token https://twitchtokengenerator.com/
+
 **Why ?**
 Because I have single screen. Before I was need to switch between Godot Editor and Chat, or reduce godot to see chat. Now I can see chat and have Godot Editor in full-screen.
 
