@@ -25,27 +25,29 @@ func get_time() -> String:
 func put_chat(senderdata : SenderData, msg : String):
 	var msgnode : Control = MsgNode.instance()
 	var badges : String = ""
-	if ($"../Gift".image_cache):
-		for badge in senderdata.tags["badges"].split(",", false):
-			badges += "[img=center]" + $"../Gift".image_cache.get_badge(badge, senderdata.tags["room-id"]).resource_path + "[/img] "
-		var locations : Array = []
-		for emote in senderdata.tags["emotes"].split("/", false):
-			var data : Array = emote.split(":")
-			for d in data[1].split(","):
-				var start_end = d.split("-")
-				locations.append(EmoteLocation.new(data[0], int(start_end[0]), int(start_end[1])))
-		locations.sort_custom(EmoteLocation, "smaller")
-		var offset = 0
-		for loc in locations:
-			var emote_string = "[img=center]" + $"../Gift".image_cache.get_emote(loc.id).resource_path +"[/img]"
-			msg = msg.substr(0, loc.start + offset) + emote_string + msg.substr(loc.end + offset + 1)
-			offset += emote_string.length() + loc.start - loc.end - 1
-	var bottom : bool = scroll_container.scroll_vertical == scroll_container.get_v_scrollbar().max_value
+#	if ($"../Gift".image_cache):
+#		for badge in senderdata.tags["badges"].split(",", false):
+#			badges += "[img=center]" + $"../Gift".image_cache.get_badge(badge, senderdata.tags["room-id"]).resource_path + "[/img] "
+#		var locations : Array = []
+#		for emote in senderdata.tags["emotes"].split("/", false):
+#			var data : Array = emote.split(":")
+#			for d in data[1].split(","):
+#				var start_end = d.split("-")
+#				locations.append(EmoteLocation.new(data[0], int(start_end[0]), int(start_end[1])))
+#		locations.sort_custom(EmoteLocation, "smaller")
+#		var offset = 0
+#		for loc in locations:
+#			var emote_string = "[img=center]" + $"../Gift".image_cache.get_emote(loc.id).resource_path +"[/img]"
+#			msg = msg.substr(0, loc.start + offset) + emote_string + msg.substr(loc.end + offset + 1)
+#			offset += emote_string.length() + loc.start - loc.end - 1
+	
+	var scrollbar = scroll_container.get_v_scrollbar()
+	
+	to_bottom = scrollbar.value + scrollbar.page >= scrollbar.max_value
+	
 	$Chat/ScrollContainer/ChatMessagesContainer.add_child(msgnode)
+	
 	msgnode.set_msg(get_time(), senderdata, msg, badges)
-	yield(get_tree(), "idle_frame")
-	if (bottom):
-		scroll_container.scroll_vertical = scroll_container.get_v_scrollbar().max_value
 
 func scroll_reset():
 	if to_bottom:
@@ -60,6 +62,7 @@ func put_join(user_name:String):
 	to_bottom = scrollbar.value + scrollbar.page >= scrollbar.max_value
 	
 	$Chat/ScrollContainer/ChatMessagesContainer.add_child(msgnode)
+	
 	msgnode.set_join(get_time(), user_name)
 	
 class EmoteLocation extends Reference:
