@@ -4,8 +4,6 @@ extends EditorPlugin
 var dock
 
 func _enter_tree():
-	prints("plugin", "hello")
-	
 	add_custom_type("Gift", "Node", preload("res://addons/TwitchChat/gift_node.gd"), preload("res://addons/TwitchChat/icon.png"))
 
 	# Initialization of the plugin goes here.
@@ -13,7 +11,7 @@ func _enter_tree():
 	dock = preload("res://addons/TwitchChat/ChatDock/ChatDock.tscn").instance()
 
 	# Add the loaded scene to the docks.
-	add_control_to_dock(DOCK_SLOT_RIGHT_UL, dock)
+	add_control_to_dock(DOCK_SLOT_RIGHT_BL, dock)
 	# Note that LEFT_UL means the left of the editor, upper-left dock.
 	
 	pass

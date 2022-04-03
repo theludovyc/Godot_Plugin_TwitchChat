@@ -2,8 +2,6 @@ tool
 extends Gift
 
 func _ready() -> void:
-	prints("Gift", "hello")
-	
 	# I use a file in the working directory to store auth data
 	# so that I don't accidentally push it to the repository.
 	# Replace this or create a auth file with 3 lines in your
@@ -12,7 +10,7 @@ func _ready() -> void:
 	# <oauth token>
 	# <initial channel>
 	var authfile := File.new()
-	authfile.open("./auth.txt", File.READ)
+	authfile.open("res://addons/TwitchChat/auth.txt", File.READ)
 	var botname := authfile.get_line()
 	var token := authfile.get_line()
 	var initial_channel = authfile.get_line()
