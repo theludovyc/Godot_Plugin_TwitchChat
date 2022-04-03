@@ -4,7 +4,7 @@ Based on https://github.com/MennoMax/gift add a docked chat in Godot Editor
 ## Install
 Copy "TwitchChat" folder in your "res://addons/"(maybe you need to create it) folder.<br/>
 
-Add a "auth.txt" file in your "res://" folder.<br/>
+Add a "auth.txt" file in your "res://addons/TwitchChat" folder.<br/>
 In it :<br/>
 YourName<br/>
 TwitchToken<br/>
