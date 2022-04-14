@@ -1,5 +1,5 @@
 extends Reference
-class_name CommandData
+#class_name CommandData
 
 var func_ref : FuncRef
 var permission_level : int

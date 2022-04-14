@@ -22,7 +22,7 @@ func get_time() -> String:
 	
 	return str(time["hour"]) + ":" + ("0" + str(time["minute"]) if time["minute"] < 10 else str(time["minute"]))
 
-func put_chat(senderdata : SenderData, msg : String):
+func put_chat(user, channel, tags, msg : String):
 	var msgnode : Control = MsgNode.instance()
 	var badges : String = ""
 #	if ($"../Gift".image_cache):
@@ -47,7 +47,7 @@ func put_chat(senderdata : SenderData, msg : String):
 	
 	$Chat/ScrollContainer/ChatMessagesContainer.add_child(msgnode)
 	
-	msgnode.set_msg(get_time(), senderdata, msg, badges)
+	msgnode.set_msg(get_time(), user, channel, tags, msg, badges)
 
 func scroll_reset():
 	if to_bottom:

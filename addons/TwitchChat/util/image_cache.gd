@@ -1,5 +1,5 @@
 extends Resource
-class_name ImageCache
+#class_name ImageCache
 
 enum RequestType {
 	EMOTE,
