@@ -72,52 +72,10 @@ enum WhereFlag {
 	WHISPER = 2
 }
 
-func _init():
-	websocket.verify_ssl = true
-	user_regex.compile("(?<=!)[\\w]*(?=@)")
-
 func _ready() -> void:
-	websocket.connect("data_received", self, "data_received")
-	websocket.connect("connection_established", self, "connection_established")
-	websocket.connect("connection_closed", self, "connection_closed")
-	websocket.connect("server_close_request", self, "sever_close_request")
-	websocket.connect("connection_error", self, "connection_error")
+	pass
 #	if(get_images):
 #		image_cache = ImageCache.new(disk_cache, disk_cache_path)
-
-func connect_to_twitch() -> void:
-	if(websocket.connect_to_url("wss://irc-ws.chat.twitch.tv:443") != OK):
-		print_debug("Could not connect to Twitch.")
-		emit_signal("twitch_unavailable")
-
-func _process(delta : float) -> void:
-	if(websocket.get_connection_status() != NetworkedMultiplayerPeer.CONNECTION_DISCONNECTED):
-		websocket.poll()
-		if (!chat_queue.empty() && (last_msg + chat_timeout_ms) <= OS.get_ticks_msec()):
-			send(chat_queue.pop_front())
-			last_msg = OS.get_ticks_msec()
-
-# Login using a oauth token.
-# You will have to either get a oauth token yourself or use
-# https://twitchapps.com/tokengen/
-# to generate a token with custom scopes.
-func authenticate_oauth(nick : String, token : String) -> void:
-	websocket.get_peer(1).set_write_mode(WebSocketPeer.WRITE_MODE_TEXT)
-	send("PASS " + ("" if token.begins_with("oauth:") else "oauth:") + token, true)
-	send("NICK " + nick.to_lower())
-	request_caps()
-
-func request_caps(caps : String = "twitch.tv/commands twitch.tv/tags twitch.tv/membership") -> void:
-	send("CAP REQ :" + caps)
-
-# Sends a String to Twitch.
-func send(text : String, token : bool = false) -> void:
-	websocket.get_peer(1).put_packet(text.to_utf8())
-	if(OS.is_debug_build()):
-		if(!token):
-			handle_send(text.strip_edges(false))
-		else:
-			print("< PASS oauth:******************************")
 
 # Sends a chat message to a channel. Defaults to the only connected channel.
 func chat(message : String, channel : String = ""):
@@ -131,18 +89,6 @@ func chat(message : String, channel : String = ""):
 
 func whisper(message : String, target : String) -> void:
 	chat("/w " + target + " " + message)
-
-func data_received() -> void:
-	var messages : PoolStringArray = websocket.get_peer(1).get_packet().get_string_from_utf8().strip_edges(false).split("\r\n")
-	var tags = {}
-	for message in messages:
-		if(message.begins_with("@")):
-			var msg : PoolStringArray = message.split(" ", false, 1)
-			message = msg[1]
-			for tag in msg[0].split(";"):
-				var pair = tag.split("=")
-				tags[pair[0]] = pair[1]
-		handle_message(message, tags)
 
 # Registers a command on an object with a func to call, similar to connect(signal, instance, func).
 #func add_command(cmd_name : String, instance : Object, instance_func : String, max_args : int = 0, min_args : int = 0, permission_level : int = PermissionFlag.EVERYONE, where : int = WhereFlag.CHAT) -> void:
@@ -173,48 +119,6 @@ func add_alias(cmd_name : String, alias : String) -> void:
 func add_aliases(cmd_name : String, aliases : PoolStringArray) -> void:
 	for alias in aliases:
 		add_alias(cmd_name, alias)
-
-func handle_message(message : String, tags : Dictionary) -> void:
-	if(message == ":tmi.twitch.tv NOTICE * :Login authentication failed"):
-		print_debug("Authentication failed.")
-		emit_signal("login_attempt", false)
-		return
-		
-	if(message == "PING :tmi.twitch.tv"):
-		send("PONG :tmi.twitch.tv")
-		emit_signal("pong")
-		return
-		
-	var msg : PoolStringArray = message.split(" ", true, 3)
-	
-	match msg[1]:
-		"001":
-			print_debug("Authentication successful.")
-			emit_signal("login_attempt", true)
-		"PRIVMSG":
-			var sender_data : SenderData = SenderData.new(user_regex.search(msg[0]).get_string(), msg[2], tags)
-#			handle_command(sender_data, msg[3].split(" ", true, 1))
-			emit_signal("chat_message", sender_data, msg[3].right(1))
-		"WHISPER":
-			print("> " + message)
-			var sender_data : SenderData = SenderData.new(user_regex.search(msg[0]).get_string(), msg[2], tags)
-#			handle_command(sender_data, msg[3].split(" ", true, 1), true)
-			emit_signal("whisper_message", sender_data, msg[3].right(1))
-		"RECONNECT":
-			twitch_restarting = true
-		"JOIN":
-			emit_signal("join_message", msg[0].left(msg[0].find('!')).right(1))
-		"PART":
-			emit_signal("part_message")
-		_:
-			print("> " + message)
-			emit_signal("unhandled_message", message, tags)
-
-func handle_send(message : String):
-	if message == "PONG :tmi.twitch.tv":
-		return
-	else:
-		print("< " + message)
 
 #func handle_command(sender_data : SenderData, msg : PoolStringArray, whisper : bool = false) -> void:
 #	if(command_prefixes.has(msg[0].substr(1, 1))):
@@ -261,36 +165,7 @@ func get_perm_flag_from_tags(tags : Dictionary) -> int:
 			flag += PermissionFlag.SUB
 	return flag
 
-func join_channel(channel : String) -> void:
-	var lower_channel : String = channel.to_lower()
-	send("JOIN #" + lower_channel)
-	channels[lower_channel] = {}
-
 func leave_channel(channel : String) -> void:
 	var lower_channel : String = channel.to_lower()
-	send("PART #" + lower_channel)
+#	send("PART #" + lower_channel)
 	channels.erase(lower_channel)
-
-func connection_established(protocol : String) -> void:
-	print_debug("Connected to Twitch.")
-	emit_signal("twitch_connected")
-
-func connection_closed(was_clean_close : bool) -> void:
-	if(twitch_restarting):
-		print_debug("Reconnecting to Twitch")
-		emit_signal("twitch_reconnect")
-		connect_to_twitch()
-		yield(self, "twitch_connected")
-		for channel in channels.keys():
-			join_channel(channel)
-		twitch_restarting = false
-	else:
-		print_debug("Disconnected from Twitch.")
-		emit_signal("twitch_disconnected")
-
-func connection_error() -> void:
-	print_debug("Twitch is unavailable.")
-	emit_signal("twitch_unavailable")
-
-func server_close_request(code : int, reason : String) -> void:
-	pass

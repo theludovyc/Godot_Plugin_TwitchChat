@@ -12,7 +12,7 @@ signal twitch_reconnect
 # The client tried to login. Returns true if successful, else false.
 signal login_attempt(success)
 # User sent a message in chat.
-signal chat_message(sender_data, message)
+signal chat_message(user, channel, tags, message)
 # User sent a whisper message.
 signal whisper_message(sender_data, message)
 # Unhandled data passed through
@@ -152,14 +152,12 @@ func handle_message(message : String, tags : Dictionary) -> void:
 			print_debug("Authentication successful.")
 			emit_signal("login_attempt", true)
 		"PRIVMSG":
-			var sender_data : SenderData = SenderData.new(user_regex.search(msg[0]).get_string(), msg[2], tags)
 #			handle_command(sender_data, msg[3].split(" ", true, 1))
-			emit_signal("chat_message", sender_data, msg[3].right(1))
+			emit_signal("chat_message", user_regex.search(msg[0]).get_string(), msg[2], tags, msg[3].right(1))
 		"WHISPER":
 			print("> " + message)
-			var sender_data : SenderData = SenderData.new(user_regex.search(msg[0]).get_string(), msg[2], tags)
 #			handle_command(sender_data, msg[3].split(" ", true, 1), true)
-			emit_signal("whisper_message", sender_data, msg[3].right(1))
+			emit_signal("whisper_message", user_regex.search(msg[0]).get_string(), msg[2], tags, msg[3].right(1))
 		"RECONNECT":
 			twitch_restarting = true
 		"JOIN":
@@ -208,8 +206,8 @@ func _on_websocket_connection_error() -> void:
 	print_debug("Twitch is unavailable.")
 	emit_signal("twitch_unavailable")
 
-func _on_chat_message(data : SenderData, msg : String) -> void:
-	chat.put_chat(data, msg)
+func _on_chat_message(user, channel, tags, msg : String) -> void:
+	chat.put_chat(user, channel, tags, msg)
 
 func _on_join_message(user_name:String):
 	viewers += 1

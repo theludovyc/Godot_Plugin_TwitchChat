@@ -8,20 +8,14 @@
 
 config_version=4
 
-_global_script_classes=[ {
-"base": "Reference",
-"class": "SenderData",
-"language": "GDScript",
-"path": "res://addons/TwitchChat/util/sender_data.gd"
-} ]
-_global_script_class_icons={
-"SenderData": ""
-}
-
 [application]
 
 config/name="PluginTwitch"
 config/icon="res://icon.png"
+
+[editor_plugins]
+
+enabled=PoolStringArray( "res://addons/TwitchChat/plugin.cfg" )
 
 [physics]
 
