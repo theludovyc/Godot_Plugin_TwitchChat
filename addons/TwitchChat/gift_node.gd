@@ -1,5 +1,5 @@
 extends Node
-class_name Gift
+#class_name Gift
 
 # The underlying websocket sucessfully connected to twitch.
 signal twitch_connected
@@ -51,7 +51,7 @@ var last_msg = OS.get_ticks_msec()
 # Mapping of channels to their channel info, like available badges.
 var channels : Dictionary = {}
 var commands : Dictionary = {}
-var image_cache : ImageCache
+#var image_cache : ImageCache
 
 # Required permission to execute the command
 enum PermissionFlag {
@@ -82,8 +82,8 @@ func _ready() -> void:
 	websocket.connect("connection_closed", self, "connection_closed")
 	websocket.connect("server_close_request", self, "sever_close_request")
 	websocket.connect("connection_error", self, "connection_error")
-	if(get_images):
-		image_cache = ImageCache.new(disk_cache, disk_cache_path)
+#	if(get_images):
+#		image_cache = ImageCache.new(disk_cache, disk_cache_path)
 
 func connect_to_twitch() -> void:
 	if(websocket.connect_to_url("wss://irc-ws.chat.twitch.tv:443") != OK):
@@ -145,11 +145,11 @@ func data_received() -> void:
 		handle_message(message, tags)
 
 # Registers a command on an object with a func to call, similar to connect(signal, instance, func).
-func add_command(cmd_name : String, instance : Object, instance_func : String, max_args : int = 0, min_args : int = 0, permission_level : int = PermissionFlag.EVERYONE, where : int = WhereFlag.CHAT) -> void:
-	var func_ref = FuncRef.new()
-	func_ref.set_instance(instance)
-	func_ref.set_function(instance_func)
-	commands[cmd_name] = CommandData.new(func_ref, permission_level, max_args, min_args, where)
+#func add_command(cmd_name : String, instance : Object, instance_func : String, max_args : int = 0, min_args : int = 0, permission_level : int = PermissionFlag.EVERYONE, where : int = WhereFlag.CHAT) -> void:
+#	var func_ref = FuncRef.new()
+#	func_ref.set_instance(instance)
+#	func_ref.set_function(instance_func)
+#	commands[cmd_name] = CommandData.new(func_ref, permission_level, max_args, min_args, where)
 
 # Removes a single command or alias.
 func remove_command(cmd_name : String) -> void:
@@ -193,12 +193,12 @@ func handle_message(message : String, tags : Dictionary) -> void:
 			emit_signal("login_attempt", true)
 		"PRIVMSG":
 			var sender_data : SenderData = SenderData.new(user_regex.search(msg[0]).get_string(), msg[2], tags)
-			handle_command(sender_data, msg[3].split(" ", true, 1))
+#			handle_command(sender_data, msg[3].split(" ", true, 1))
 			emit_signal("chat_message", sender_data, msg[3].right(1))
 		"WHISPER":
 			print("> " + message)
 			var sender_data : SenderData = SenderData.new(user_regex.search(msg[0]).get_string(), msg[2], tags)
-			handle_command(sender_data, msg[3].split(" ", true, 1), true)
+#			handle_command(sender_data, msg[3].split(" ", true, 1), true)
 			emit_signal("whisper_message", sender_data, msg[3].right(1))
 		"RECONNECT":
 			twitch_restarting = true
@@ -216,31 +216,31 @@ func handle_send(message : String):
 	else:
 		print("< " + message)
 
-func handle_command(sender_data : SenderData, msg : PoolStringArray, whisper : bool = false) -> void:
-	if(command_prefixes.has(msg[0].substr(1, 1))):
-		var command : String  = msg[0].right(2)
-		var cmd_data : CommandData = commands.get(command)
-		if(cmd_data):
-			if(whisper == true && cmd_data.where & WhereFlag.WHISPER != WhereFlag.WHISPER):
-				return
-			elif(whisper == false && cmd_data.where & WhereFlag.CHAT != WhereFlag.CHAT):
-				return
-			var args = "" if msg.size() == 1 else msg[1]
-			var arg_ary : PoolStringArray = PoolStringArray() if args == "" else args.split(" ")
-			if(arg_ary.size() > cmd_data.max_args && cmd_data.max_args != -1 || arg_ary.size() < cmd_data.min_args):
-				emit_signal("cmd_invalid_argcount", command, sender_data, cmd_data, arg_ary)
-				print_debug("Invalid argcount!")
-				return
-			if(cmd_data.permission_level != 0):
-				var user_perm_flags = get_perm_flag_from_tags(sender_data.tags)
-				if(user_perm_flags & cmd_data.permission_level != cmd_data.permission_level):
-					emit_signal("cmd_no_permission", command, sender_data, cmd_data, arg_ary)
-					print_debug("No Permission for command!")
-					return
-			if(arg_ary.size() == 0):
-				cmd_data.func_ref.call_func(CommandInfo.new(sender_data, command, whisper))
-			else:
-				cmd_data.func_ref.call_func(CommandInfo.new(sender_data, command, whisper), arg_ary)
+#func handle_command(sender_data : SenderData, msg : PoolStringArray, whisper : bool = false) -> void:
+#	if(command_prefixes.has(msg[0].substr(1, 1))):
+#		var command : String  = msg[0].right(2)
+#		var cmd_data : CommandData = commands.get(command)
+#		if(cmd_data):
+#			if(whisper == true && cmd_data.where & WhereFlag.WHISPER != WhereFlag.WHISPER):
+#				return
+#			elif(whisper == false && cmd_data.where & WhereFlag.CHAT != WhereFlag.CHAT):
+#				return
+#			var args = "" if msg.size() == 1 else msg[1]
+#			var arg_ary : PoolStringArray = PoolStringArray() if args == "" else args.split(" ")
+#			if(arg_ary.size() > cmd_data.max_args && cmd_data.max_args != -1 || arg_ary.size() < cmd_data.min_args):
+#				emit_signal("cmd_invalid_argcount", command, sender_data, cmd_data, arg_ary)
+#				print_debug("Invalid argcount!")
+#				return
+#			if(cmd_data.permission_level != 0):
+#				var user_perm_flags = get_perm_flag_from_tags(sender_data.tags)
+#				if(user_perm_flags & cmd_data.permission_level != cmd_data.permission_level):
+#					emit_signal("cmd_no_permission", command, sender_data, cmd_data, arg_ary)
+#					print_debug("No Permission for command!")
+#					return
+#			if(arg_ary.size() == 0):
+#				cmd_data.func_ref.call_func(CommandInfo.new(sender_data, command, whisper))
+#			else:
+#				cmd_data.func_ref.call_func(CommandInfo.new(sender_data, command, whisper), arg_ary)
 
 func get_perm_flag_from_tags(tags : Dictionary) -> int:
 	var flag = 0

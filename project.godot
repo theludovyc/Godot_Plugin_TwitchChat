@@ -10,35 +10,11 @@ config_version=4
 
 _global_script_classes=[ {
 "base": "Reference",
-"class": "CommandData",
-"language": "GDScript",
-"path": "res://addons/TwitchChat/util/cmd_data.gd"
-}, {
-"base": "Reference",
-"class": "CommandInfo",
-"language": "GDScript",
-"path": "res://addons/TwitchChat/util/cmd_info.gd"
-}, {
-"base": "Node",
-"class": "Gift",
-"language": "GDScript",
-"path": "res://addons/TwitchChat/gift_node.gd"
-}, {
-"base": "Resource",
-"class": "ImageCache",
-"language": "GDScript",
-"path": "res://addons/TwitchChat/util/image_cache.gd"
-}, {
-"base": "Reference",
 "class": "SenderData",
 "language": "GDScript",
 "path": "res://addons/TwitchChat/util/sender_data.gd"
 } ]
 _global_script_class_icons={
-"CommandData": "",
-"CommandInfo": "",
-"Gift": "",
-"ImageCache": "",
 "SenderData": ""
 }
 
@@ -46,10 +22,6 @@ _global_script_class_icons={
 
 config/name="PluginTwitch"
 config/icon="res://icon.png"
-
-[editor_plugins]
-
-enabled=PoolStringArray( "res://addons/TwitchChat/plugin.cfg" )
 
 [physics]
 

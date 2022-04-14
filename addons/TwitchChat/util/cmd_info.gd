@@ -1,5 +1,5 @@
 extends Reference
-class_name CommandInfo
+#class_name CommandInfo
 
 var sender_data : SenderData
 var command : String
